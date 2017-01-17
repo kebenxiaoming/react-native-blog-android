@@ -4,3 +4,5 @@
 npm install</br>然后打包到android</br>
 在根目录react-native start开启react-native的server</br>
 按照react-native的方式调试代码即可
+
+#示例APK在apk文件夹下
