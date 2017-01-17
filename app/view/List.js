@@ -10,12 +10,11 @@ export default class List extends Component {
 	constructor(props) {
     super(props);
     this.state ={
-      loadFlag:false,
       first:true,
       page:1,
       msg:"",
       totalBlogs:new Array(),
-      isLoading:false,
+      isLoading:true,
       dataSource: new ListView.DataSource({
                  rowHasChanged: (row1, row2) => row1 !== row2,
       }),
@@ -37,9 +36,6 @@ export default class List extends Component {
     }
 
   getBlogRequest(p){
-    if(this.state.isLoading){
-      return;
-    }
     if(!this.state.first){
         this.state.page=this.state.page+1;
     }else{
@@ -60,20 +56,18 @@ export default class List extends Component {
             if(this.state.first){
             this.setState({
              dataSource: this.state.dataSource.cloneWithRows(this.state.totalBlogs),
-             isLoading:true,
+             isLoading:false,
              first:false,
             });
             }else{
             this.setState({
              dataSource: this.state.dataSource.cloneWithRows(this.state.totalBlogs),
-             isLoading:true,
-             loadFlag:false,
+             isLoading:false,
             });
             }
             }else{
               this.setState({
               isLoading:false,
-              loadFlag:false,
               msg:msg
               });
           }
@@ -81,7 +75,6 @@ export default class List extends Component {
       } catch(e) {
         this.setState({
           isLoading:false,
-          loadFlag:false,
           msg:JSON.stringify(e)
         });
       }
@@ -90,12 +83,12 @@ export default class List extends Component {
     if(this.state.first){
         return;
     }
-    this.setState({
-         isLoading:false,
-         loadFlag:true,
+    if(!this.state.isLoading){
+    	this.setState({
+         isLoading:true,
         });
-    this.getBlogRequest(this.state.page);
-    
+    	this.getBlogRequest(this.state.page);
+	}
   }
   //显示加载
    renderLoadingView()
@@ -145,7 +138,7 @@ export default class List extends Component {
 
   //页脚的家在显示
   _pressRendorFooter(){
-         	if(this.state.loadFlag){
+         	if(this.state.isLoading){
          	    return <View style={{flex:1,flexDirection:'row',justifyContent:'center',alignItems:'center',height:40}}><Text style={{color:"#3F51B5"}}>正在加载...</Text></View>
          	}else{
          		return <View style={{flex:1,flexDirection:'row',justifyContent:'center',alignItems:'center',height:40}}><Text style={{color:"#3F51B5"}}>{this.state.msg}</Text></View>
@@ -153,7 +146,7 @@ export default class List extends Component {
   }   
 
   render() {
-    if (!this.state.isLoading&&this.state.first) {
+    if (this.state.isLoading&&this.state.first) {
              return this.renderLoadingView();
     }
     return (
@@ -166,7 +159,7 @@ export default class List extends Component {
                  renderFooter={this._pressRendorFooter.bind(this)}
                  style={styles.listView}
                  onEndReached={this._loadmore.bind(this)}
-                 onEndReachedThreshold={10}
+                 onEndReachedThreshold={200}
              />
              </View>
              </View>
