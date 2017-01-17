@@ -10,9 +10,10 @@ export default class List extends Component {
 	constructor(props) {
     super(props);
     this.state ={
-      flag:false,
+      loadFlag:false,
       first:true,
       page:1,
+      msg:"",
       totalBlogs:new Array(),
       isLoading:false,
       dataSource: new ListView.DataSource({
@@ -21,7 +22,7 @@ export default class List extends Component {
     };
   }
 
-  componentDidMount(){
+  componentWillMount(){
         this.getBlogRequest(this.state.page);
   }
   _pressHomeButton() {
@@ -66,28 +67,22 @@ export default class List extends Component {
             this.setState({
              dataSource: this.state.dataSource.cloneWithRows(this.state.totalBlogs),
              isLoading:true,
-             flag:false
+             loadFlag:false,
             });
             }
             }else{
-              Alert.alert(
-              '提示信息',
-              msg,
-              );
               this.setState({
               isLoading:false,
-              flag:false
+              loadFlag:false,
+              msg:msg
               });
           }
         })
       } catch(e) {
-        Alert.alert(
-            '提示信息',
-            JSON.stringify(e),
-          );
         this.setState({
           isLoading:false,
-          flag:false
+          loadFlag:false,
+          msg:JSON.stringify(e)
         });
       }
   }
@@ -97,9 +92,8 @@ export default class List extends Component {
     }
     this.setState({
          isLoading:false,
+         loadFlag:true,
         });
-    this.state.flag=true;
-    this.forceUpdate();
     this.getBlogRequest(this.state.page);
     
   }
@@ -149,6 +143,15 @@ export default class List extends Component {
          );
      }
 
+  //页脚的家在显示
+  _pressRendorFooter(){
+         	if(this.state.loadFlag){
+         	    return <View style={{flex:1,flexDirection:'row',justifyContent:'center',alignItems:'center',height:40}}><Text style={{color:"#3F51B5"}}>正在加载...</Text></View>
+         	}else{
+         		return <View style={{flex:1,flexDirection:'row',justifyContent:'center',alignItems:'center',height:40}}><Text style={{color:"#3F51B5"}}>{this.state.msg}</Text></View>
+         	}
+  }   
+
   render() {
     if (!this.state.isLoading&&this.state.first) {
              return this.renderLoadingView();
@@ -160,16 +163,11 @@ export default class List extends Component {
           <ListView
                  dataSource={this.state.dataSource}
                  renderRow={this.renderBlog.bind(this)}
+                 renderFooter={this._pressRendorFooter.bind(this)}
                  style={styles.listView}
                  onEndReached={this._loadmore.bind(this)}
-                 onEndReachedThreshold={50}
+                 onEndReachedThreshold={10}
              />
-             <ActivityIndicator
-              animating={this.state.flag}
-              hidesWhenStopped={true}
-              style={[styles.centering]}
-              size="large"
-              />
              </View>
              </View>
     )
